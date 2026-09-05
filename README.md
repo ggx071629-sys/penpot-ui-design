@@ -2,20 +2,22 @@
 
 一套面向 Codex 本地任务的可复用设计工作区：你提供业务想法或方案，助手整理需求，在 Penpot 中分步设计、审阅并交付可编辑成果。
 
-本项目是基于第三方 Penpot AI Kit 定制的工作区，不是 Penpot 官方产品，也不是一键安装插件。无需运行 Kit 安装器。
+[Penpot AI Kit](https://github.com/penpot/penpot-ai-kit) 是位于 Penpot 官方 GitHub 组织下的开源工具包，提供 AI 设计技能、工作流和操作规则。本项目在其基础上增加 Mac / Windows 工作区适配、业务资料模板和本地维护工具，作为独立定制版本维护。使用本工作区无需运行 Kit 安装器。
 
 ## 选择平台版本
 
-本仓库提供 `windows/` 和 `mac/` 两个独立项目。请在 Codex 中打开对应目录，或将该目录完整复制到其他位置使用；两者不依赖彼此或父目录中的工具文件。
+本仓库提供 `windows/` 和 `mac/` 两个独立项目，两者不依赖彼此或父目录中的工具文件。建议将所选目录完整复制到仓库外的独立位置，再在 Codex 中打开。
 
 | 项目 | 适用环境 | 技能入口与维护 | 使用说明 |
 |---|---|---|---|
 | `windows/` | Windows | 普通技能目录；显式 UTF-8 编码和 LF 换行，无需管理员权限创建符号链接。维护 Kit 后同步技能副本。 | [Windows README](windows/README.md) |
 | `mac/` | macOS | 保留相对符号链接；从文件夹副本首次使用时运行初始化命令恢复链接。 | [Mac README](mac/README.md) |
 
-Mac 用户也可以解压 [mac.tar.gz](mac.tar.gz)，其中已保存真实的相对符号链接。直接复制 `mac/` 文件夹时，先在 Mac 上执行 `python3 tools/prepare.py`。初始化只恢复已知链接占位文件，不安装全局资源。
+使用仓库里的 `mac/` 文件夹副本时，先进入该副本目录，运行 `python3 tools/prepare.py` 恢复链接。初始化只替换已知占位文件；已有正确链接保持不变，未知内容会拒绝覆盖。
 
-根目录原有工具文件保留作拆分前参考。以下使用流程中的“项目根目录”和命令路径，均指所选的 `windows/` 或 `mac/` 项目根目录。业务资料分别存入对应项目的 `business-projects/`；两个版本的 Kit 后续维护不会自动相互同步。
+请在 `mac/` 或 `windows/` 中开始设计任务；平台目录各自包含完整的技能入口。
+
+根目录仅保留 README 总入口、两套平台工程及 Git 配置等隐藏项。以下使用流程中的“项目根目录”和命令路径，均指所选平台目录或其独立副本的根目录。业务资料分别存入对应项目的 `business-projects/`；两个版本的 Kit 后续维护不会自动相互同步。
 
 ## 使用前准备
 
@@ -33,7 +35,7 @@ Python 和 Node.js 是本工作区维护工具的要求；远程 Penpot MCP 无�
 
 ### 1. 打开并检查工作区
 
-将所选平台目录放在你选择的位置，在 Codex 中打开该目录；不要只打开 `penpot-kit/`。保留 `.agents/` 等隐藏目录及 `.gitattributes`。
+将所选平台目录复制到独立位置，保留 `.agents/` 等隐藏目录及 `.gitattributes`。先在终端进入该目录完成以下初始化和校验，再在 Codex 中打开它；不要只打开 `penpot-kit/`。
 
 Windows 在所选项目根目录的终端运行：
 
@@ -52,7 +54,9 @@ python3 tools/prepare.py
 python3 tools/workspace.py verify
 ```
 
-Windows 版校验脚本已显式使用 UTF-8，无需额外添加 `-X utf8`。Mac 版初始化可重复运行，已有正确链接会保持不变。
+Windows 版校验脚本已显式使用 UTF-8，无需额外添加 `-X utf8`。Mac 版首次处理文本占位文件时会显示 `Restored 12 relative skill links.`，再次运行显示 `Restored 0 relative skill links.`。副本已带正确链接时，首次运行也可显示 0。
+
+如果直接在 Git 仓库内初始化 `mac/`，Git 会将 12 个入口显示为文件类型变化（`T`）：文本占位文件变成了符号链接，这是初始化的预期结果。在独立副本中初始化可保持原仓库不变。
 
 应得到 `passed: 8`、`total: 8`、空的 `errors`，退出码为 0。失败时按 `errors` 排查，见 [Windows 维护说明](windows/docs/maintenance.md)或 [Mac 维护说明](mac/docs/maintenance.md)。
 
@@ -79,7 +83,7 @@ url = "在本机替换为 Penpot 提供的完整服务 URL"
 
 ### 3. 做一次只读连接确认
 
-在本项目新建任务，发送：
+在已初始化的平台副本中打开新任务，发送：
 
 ```text
 请读取项目 AGENTS.md 和 penpot-kit/AGENTS.md，按 penpot-router 检查连接。
@@ -113,11 +117,20 @@ url = "在本机替换为 Penpot 提供的完整服务 URL"
 | `deliverables/` | 设计成果、导出图和 Penpot 链接 |
 | `handoffs/` | 实施说明及未解决事项 |
 
-不需要提前填满模板。设计建议与已确认内容分开，审批与交付记录随实际进度补充。设计按页面和区块逐步完成，优先复用组件及样式，并在适用节点请你审阅。业务项目负责后续开发、发布与验收。完整任务启动约定见[启动说明](docs/start-task.md)。
+不需要提前填满模板。设计建议与已确认内容分开，审批与交付记录随实际进度补充。设计按页面和区块逐步完成，优先复用组件及样式，并在适用节点请你审阅。业务项目负责后续开发、发布与验收。完整任务启动约定见 [Mac 启动说明](mac/docs/start-task.md)或 [Windows 启动说明](windows/docs/start-task.md)。
 
 ## 项目结构
 
-平台项目位于 `windows/` 和 `mac/`；每个项目均包含下面的完整结构：
+根目录组织如下：
+
+```text
+README.md        使用总入口
+mac/             Mac 独立工程
+windows/         Windows 独立工程
+.*               Git 配置等隐藏文件及目录
+```
+
+`windows/` 和 `mac/` 各自包含下面的完整结构：
 
 | 路径 | 作用 |
 |---|---|
@@ -138,14 +151,16 @@ Windows 另有 `tools/sync-skills.py`，用于从 `penpot-kit/skills/` 更新生
 
 ## 已验证范围与限制
 
-- 已验证环境：macOS arm64（Python 3.14.7、Node.js 24.19.0，原工作区本地工具与可移植性检查）；Windows x64（Python 3.11.9、Node.js 24.18.0，Windows 专用版本地工具与可移植性检查）。当前客户端 Penpot MCP 只读连接已通过。
-- 已完成同机干净目录副本校验：Mac 原工作区保留相对技能链接，Windows 专用版使用普通技能目录；副本不包含 `.git/`、用户配置或业务数据，并从含空格的新路径运行检查。
-- 已验证常见失败提示：缺少 Node.js、技能链接损坏、清单损坏、锁文件不匹配、生命周期保护缺失；Windows 版另验证了技能副本内容漂移和文件缺失检测及同步恢复。
-- 本次拆分后的 Mac 副本和初始化命令尚未在 macOS 复验；尚未完成另一台电脑、最低支持版本、客户端自动发现全部技能及新账号 Penpot 连接与写入操作的端到端验证。Linux 不在这两个专用版本的适配范围内。
-- 本地 `verify` 不检查 Codex 是否实际加载技能，也不检查 MCP 登录、文件权限或画布设计质量；接收者仍需完成首次使用中的只读确认。
+- **已验证环境**：macOS arm64（Python 3.14.7、Node.js 24.19.0、Codex CLI 0.153.1）；Windows x64（Python 3.11.9、Node.js 24.18.0）。
+- **Mac 版**：工作区校验 8/8 通过；初始化可重复运行并保护未知文件；独立副本支持中文和空格路径，12 个项目技能均可被 Codex 正确发现。
+- **Windows 版**：本地工具与独立副本校验通过，支持技能副本内容漂移、文件缺失检测及同步恢复。
+- **使用限制**：根目录不作为设计工作区；使用对应平台目录或其独立副本。平台目录中的技能入口分别维护。Linux 不在这两个专用版本的适配范围内。
+- **连接要求**：本地校验仅覆盖工具和文件结构；使用前需自行配置 Penpot MCP，并确认目标文件连接正常。
 
 ## 来源与许可
 
-`penpot-kit/` 基于 [elhombretecla/penpot-ai-kit](https://github.com/elhombretecla/penpot-ai-kit)，所附 `package.json` 标注版本 0.3.0、许可 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)。保留工具集的来源与许可说明。
+上游工具包：[Penpot AI Kit — penpot/penpot-ai-kit](https://github.com/penpot/penpot-ai-kit)，仓库归属 Penpot 官方 GitHub 组织。
+
+`mac/penpot-kit/` 和 `windows/penpot-kit/` 为分别维护的定制副本，所附 `package.json` 标注版本 0.3.0、许可 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)。本地版本与上游分别维护，不能仅凭上游仓库的状态判断本地功能或版本。分享时保留工具集已有的来源与许可说明。
 
 本工作区的定制包括项目级技能入口、业务资料模板、操作说明、校验工具，以及设计审批和生命周期保护调整。业务资料及设计成果不因放入此目录而自动采用工具集许可；对外提供时需分别确认授权范围。
