@@ -1,12 +1,12 @@
 # Penpot 独立设计工作区
 
-一套面向 Codex 本地任务的可复用设计工作区：你提供业务想法或方案，助手整理需求，在 Penpot 中分步设计、审阅并交付可编辑成果。
+一套可供 Codex 和其他 AI Agent 使用的可复用设计工作区：你提供业务想法或方案，助手整理需求，在 Penpot 中分步设计、审阅并交付可编辑成果。
 
 [Penpot AI Kit](https://github.com/penpot/penpot-ai-kit) 是位于 Penpot 官方 GitHub 组织下的开源工具包，提供 AI 设计技能、工作流和操作规则。本项目在其基础上增加 Mac / Windows 工作区适配、业务资料模板和本地维护工具，作为独立定制版本维护。使用本工作区无需运行 Kit 安装器。
 
 ## 选择平台版本
 
-本仓库提供 `windows/` 和 `mac/` 两个独立项目，两者不依赖彼此或父目录中的工具文件。建议将所选目录完整复制到仓库外的独立位置，再在 Codex 中打开。
+本仓库提供 `windows/` 和 `mac/` 两个独立项目，两者不依赖彼此或父目录中的工具文件。建议将所选目录完整复制到仓库外的独立位置，再在所用的 AI Agent 中打开。
 
 | 项目 | 适用环境 | 技能入口与维护 | 使用说明 |
 |---|---|---|---|
@@ -23,7 +23,7 @@
 
 | 要求 | 用途 |
 |---|---|
-| 可访问本地文件、使用 Skills 和 MCP 的 Codex 客户端 | 读取项目规则、执行设计任务 |
+| 可访问本地文件、读取技能指令并调用 MCP 的 AI Agent | 读取项目规则、执行设计任务 |
 | Python 3.9+，终端中能运行 `python3`（Windows 可用 `python`） | 工作区校验，无第三方 Python 依赖 |
 | Node.js 22+，终端中能运行 `node` | Kit 校验，无需为此运行 `npm install` |
 | Penpot 账号及目标文件访问权限 | 打开设计文件并启用 MCP |
@@ -35,7 +35,7 @@ Python 和 Node.js 是本工作区维护工具的要求；远程 Penpot MCP 无�
 
 ### 1. 打开并检查工作区
 
-将所选平台目录复制到独立位置，保留 `.agents/` 等隐藏目录及 `.gitattributes`。先在终端进入该目录完成以下初始化和校验，再在 Codex 中打开它；不要只打开 `penpot-kit/`。
+将所选平台目录复制到独立位置，保留 `.agents/` 等隐藏目录及 `.gitattributes`。先在终端进入该目录完成以下初始化和校验，再在所用的 AI Agent 中打开它；不要只打开 `penpot-kit/`。
 
 Windows 在所选项目根目录的终端运行：
 
@@ -60,19 +60,21 @@ Windows 版校验脚本已显式使用 UTF-8，无需额外添加 `-X utf8`。Ma
 
 应得到 `passed: 8`、`total: 8`、空的 `errors`，退出码为 0。失败时按 `errors` 排查，见 [Windows 维护说明](windows/docs/maintenance.md)或 [Mac 维护说明](mac/docs/maintenance.md)。
 
-Codex 从 `.agents/skills/` 发现项目技能，并支持符号链接；本工作区提供 12 个 `penpot-` 技能。新任务中应能找到 `penpot-router`；没有出现时重新打开客户端并检查目录。参见 [OpenAI Skills 文档](https://learn.chatgpt.com/docs/build-skills)。
+本工作区提供 12 个 `penpot-` 技能。让 Agent 读取项目 `AGENTS.md`，并按其中的路径加载 `penpot-router` 及所需技能，即可开始任务。
+
+使用 Codex 时，客户端会从 `.agents/skills/` 发现项目技能，并支持符号链接。新任务中应能找到 `penpot-router`；没有出现时重新打开客户端并检查目录。参见 [OpenAI Skills 文档](https://learn.chatgpt.com/docs/build-skills)。
 
 ### 2. 连接 Penpot
 
 首次使用建议采用远程连接：
 
 1. 在 Penpot 的 **Your account → Integrations → MCP Server** 启用 MCP，生成密钥并复制服务 URL。
-2. 在 Codex 客户端的 MCP 设置中添加名为 `penpot` 的 **Streamable HTTP** 服务，粘贴该 URL，保存并重启连接。
+2. 在所用 Agent 的 MCP 设置中添加名为 `penpot` 的 **Streamable HTTP** 服务，粘贴该 URL，保存并重启连接。
 3. 打开目标 Penpot 文件，通过 **File → MCP Server → Connect** 连接当前文件，并保持连接。
 
 Penpot 的服务 URL 包含个人凭据，由接收者自行配置；不要放入业务方案、共享文件或本仓库。连接流程以 [Penpot 官方 MCP 指南](https://help.penpot.app/mcp/)为准。
 
-若客户端没有图形配置入口，可以在用户级 `~/.codex/config.toml` 中合并以下配置，保留已有的其他设置；已有同名服务时编辑原表，不要重复添加：
+以 Codex 为例，也可以在用户级 `~/.codex/config.toml` 中合并以下配置，保留已有的其他设置；已有同名服务时编辑原表，不要重复添加：
 
 ```toml
 [mcp_servers.penpot]
@@ -135,7 +137,7 @@ windows/         Windows 独立工程
 | 路径 | 作用 |
 |---|---|
 | `AGENTS.md` | AI 的工作范围、规则和审批边界 |
-| `.agents/skills/` | Codex 技能发现入口 |
+| `.agents/skills/` | 项目技能入口 |
 | `penpot-kit/` | 技能、工作流、规则、脚本及技术参考 |
 | `business-projects/` | 空模板和各业务项目的设计资料 |
 | `docs/` | 任务启动、维护和故障排查说明 |
