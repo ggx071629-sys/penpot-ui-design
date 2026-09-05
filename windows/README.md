@@ -1,31 +1,20 @@
-# Penpot 独立设计工作区
+# Windows 专用 Penpot 设计工作区
 
 一套面向 Codex 本地任务的可复用设计工作区：你提供业务想法或方案，助手整理需求，在 Penpot 中分步设计、审阅并交付可编辑成果。
 
+本目录可独立复制和使用，不依赖旁边的 `mac/` 或父目录文件。技能入口采用普通目录，工具读写显式使用 UTF-8；`.gitattributes` 固定文本为 LF。
+
 本项目是基于第三方 Penpot AI Kit 定制的工作区，不是 Penpot 官方产品，也不是一键安装插件。无需运行 Kit 安装器。
-
-## 选择平台版本
-
-本仓库提供 `windows/` 和 `mac/` 两个独立项目。请在 Codex 中打开对应目录，或将该目录完整复制到其他位置使用；两者不依赖彼此或父目录中的工具文件。
-
-| 项目 | 适用环境 | 技能入口与维护 | 使用说明 |
-|---|---|---|---|
-| `windows/` | Windows | 普通技能目录；显式 UTF-8 编码和 LF 换行，无需管理员权限创建符号链接。维护 Kit 后同步技能副本。 | [Windows README](windows/README.md) |
-| `mac/` | macOS | 保留相对符号链接；从文件夹副本首次使用时运行初始化命令恢复链接。 | [Mac README](mac/README.md) |
-
-Mac 用户也可以解压 [mac.tar.gz](mac.tar.gz)，其中已保存真实的相对符号链接。直接复制 `mac/` 文件夹时，先在 Mac 上执行 `python3 tools/prepare.py`。初始化只恢复已知链接占位文件，不安装全局资源。
-
-根目录原有工具文件保留作拆分前参考。以下使用流程中的“项目根目录”和命令路径，均指所选的 `windows/` 或 `mac/` 项目根目录。业务资料分别存入对应项目的 `business-projects/`；两个版本的 Kit 后续维护不会自动相互同步。
 
 ## 使用前准备
 
 | 要求 | 用途 |
 |---|---|
 | 可访问本地文件、使用 Skills 和 MCP 的 Codex 客户端 | 读取项目规则、执行设计任务 |
-| Python 3.9+，终端中能运行 `python3`（Windows 可用 `python`） | 工作区校验，无第三方 Python 依赖 |
+| Python 3.9+，终端中能运行 `python` | 工作区校验，无第三方 Python 依赖 |
 | Node.js 22+，终端中能运行 `node` | Kit 校验，无需为此运行 `npm install` |
 | Penpot 账号及目标文件访问权限 | 打开设计文件并启用 MCP |
-| 保留隐藏目录及 `.gitattributes` 的完整项目副本 | Windows 保留普通技能目录；Mac 保留或初始化相对符号链接 |
+| 保留隐藏目录的完整项目副本 | 包含 `.agents/skills/` 中的普通技能目录 |
 
 Python 和 Node.js 是本工作区维护工具的要求；远程 Penpot MCP 无需在本机启动 MCP 服务。
 
@@ -33,30 +22,21 @@ Python 和 Node.js 是本工作区维护工具的要求；远程 Penpot MCP 无�
 
 ### 1. 打开并检查工作区
 
-将所选平台目录放在你选择的位置，在 Codex 中打开该目录；不要只打开 `penpot-kit/`。保留 `.agents/` 等隐藏目录及 `.gitattributes`。
+将整个项目放在你选择的位置，在 Codex 中打开根目录；不要只打开 `penpot-kit/`。保留 `.agents/` 等隐藏目录及 `.gitattributes`；无需创建符号链接。
 
-Windows 在所选项目根目录的终端运行：
+在项目根目录的终端运行：
 
-```powershell
+```sh
 python --version
 node --version
 python tools/workspace.py verify
 ```
 
-Mac 在所选项目根目录的终端运行：
+也可用 `py -3` 替换 `python`。校验脚本已显式指定 UTF-8，无需额外设置系统编码或添加 `-X utf8`。
 
-```sh
-python3 --version
-node --version
-python3 tools/prepare.py
-python3 tools/workspace.py verify
-```
+应得到 `passed: 8`、`total: 8`、空的 `errors`，退出码为 0。失败时按 `errors` 排查，见[维护与故障排查](docs/maintenance.md)。
 
-Windows 版校验脚本已显式使用 UTF-8，无需额外添加 `-X utf8`。Mac 版初始化可重复运行，已有正确链接会保持不变。
-
-应得到 `passed: 8`、`total: 8`、空的 `errors`，退出码为 0。失败时按 `errors` 排查，见 [Windows 维护说明](windows/docs/maintenance.md)或 [Mac 维护说明](mac/docs/maintenance.md)。
-
-Codex 从 `.agents/skills/` 发现项目技能，并支持符号链接；本工作区提供 12 个 `penpot-` 技能。新任务中应能找到 `penpot-router`；没有出现时重新打开客户端并检查目录。参见 [OpenAI Skills 文档](https://learn.chatgpt.com/docs/build-skills)。
+Codex 从 `.agents/skills/` 的普通目录发现项目技能；本工作区提供 12 个 `penpot-` 技能。新任务中应能找到 `penpot-router`；没有出现时重新打开客户端并检查目录。参见 [OpenAI Skills 文档](https://learn.chatgpt.com/docs/build-skills)。
 
 ### 2. 连接 Penpot
 
@@ -117,31 +97,28 @@ url = "在本机替换为 Penpot 提供的完整服务 URL"
 
 ## 项目结构
 
-平台项目位于 `windows/` 和 `mac/`；每个项目均包含下面的完整结构：
-
 | 路径 | 作用 |
 |---|---|
 | `AGENTS.md` | AI 的工作范围、规则和审批边界 |
-| `.agents/skills/` | Codex 技能发现入口 |
+| `.agents/skills/` | Codex 技能发现入口，由 Kit 生成的普通目录副本 |
 | `penpot-kit/` | 技能、工作流、规则、脚本及技术参考 |
 | `business-projects/` | 空模板和各业务项目的设计资料 |
 | `docs/` | 任务启动、维护和故障排查说明 |
-| `tools/workspace.py` | 只读环境及结构校验 |
-
-Windows 另有 `tools/sync-skills.py`，用于从 `penpot-kit/skills/` 更新生成的技能副本；Mac 另有 `tools/prepare.py`，用于恢复相对技能链接。请只维护各版本的 Kit 源文件，Windows 技能副本中的直接修改会在同步时被覆盖。
+| `tools/workspace.py` | 只读环境、结构及技能副本一致性校验 |
+| `tools/sync-skills.py` | 从 Kit 同步技能目录，覆盖生成的副本 |
 
 ## 分享此工作区
 
-分享所选平台项目时，保留 `AGENTS.md`、`README.md`、`.gitignore`、`.gitattributes`、`.agents/`、`penpot-kit/`、`docs/`、`tools/`，以及 `business-projects/README.md` 和 `_template/`。Windows 使用普通目录；Mac 打包时保留符号链接，或让接收者运行初始化命令恢复链接。
+分享项目文件时，保留 `AGENTS.md`、`README.md`、`.gitignore`、`.gitattributes`、`.agents/`、`penpot-kit/`、`docs/`、`tools/`，以及 `business-projects/README.md` 和 `_template/`。打包工具需要保留隐藏文件及 `.gitattributes`，无需符号链接支持。
 
 公共模板不要包含实际业务项目目录、`.git/`、`.local/`、个人配置、凭据、缓存或系统杂项。`.gitignore` 只影响 Git，不会替普通文件夹压缩自动排除这些内容。接收者需要自行配置账号和 MCP。
 
 ## 已验证范围与限制
 
-- 已验证环境：macOS arm64（Python 3.14.7、Node.js 24.19.0，原工作区本地工具与可移植性检查）；Windows x64（Python 3.11.9、Node.js 24.18.0，Windows 专用版本地工具与可移植性检查）。当前客户端 Penpot MCP 只读连接已通过。
-- 已完成同机干净目录副本校验：Mac 原工作区保留相对技能链接，Windows 专用版使用普通技能目录；副本不包含 `.git/`、用户配置或业务数据，并从含空格的新路径运行检查。
-- 已验证常见失败提示：缺少 Node.js、技能链接损坏、清单损坏、锁文件不匹配、生命周期保护缺失；Windows 版另验证了技能副本内容漂移和文件缺失检测及同步恢复。
-- 本次拆分后的 Mac 副本和初始化命令尚未在 macOS 复验；尚未完成另一台电脑、最低支持版本、客户端自动发现全部技能及新账号 Penpot 连接与写入操作的端到端验证。Linux 不在这两个专用版本的适配范围内。
+- 已验证环境：Windows x64（Python 3.11.9、Node.js 24.18.0，本地工具与可移植性检查）；当前客户端的 Penpot MCP 只读连接已通过。
+- 已完成同机干净目录副本校验：使用普通技能目录，不包含 `.git/`、用户配置或业务数据，并从含空格的新路径运行检查。
+- 校验覆盖运行时、工作区文件、技能副本一致性、业务模板、生命周期保护、Kit 内容和内容锁。
+- 尚未完成另一台电脑、最低支持版本、客户端自动发现全部技能及新账号 Penpot 连接与写入操作的端到端验证；macOS 请使用 Mac 专用版。
 - 本地 `verify` 不检查 Codex 是否实际加载技能，也不检查 MCP 登录、文件权限或画布设计质量；接收者仍需完成首次使用中的只读确认。
 
 ## 来源与许可
